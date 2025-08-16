@@ -1,0 +1,12 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "dev.matrixman.cobblemonutils.mixin",
+    "compatibilityLevel": "JAVA_21",
+    "client": [
+        "PokemonNameMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

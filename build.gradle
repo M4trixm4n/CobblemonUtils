@@ -1,0 +1,92 @@
+plugins {
+    id("org.jetbrains.kotlin.jvm") version "1.9.20-RC"
+    id 'fabric-loom' version '1.8-SNAPSHOT'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    maven {
+        name "GeckoLib"
+        url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+    }
+    maven { url "https://maven.nucleoid.xyz/" }
+    maven { url 'https://jitpack.io' }
+
+    maven { url = 'https://maven.parchmentmc.org' }
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    maven { url = "https://maven.impactdev.net/repository/development/" }
+    maven {
+        url "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
+
+    mavenCentral()
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    modImplementation("com.cobblemon:fabric:${project.cobblemon_version}")
+    implementation "org.jetbrains.kotlin:kotlin-reflect:1.9.20-RC"
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+tasks.jar {
+    from('LICENSE')
+}
+
+java {
+    withSourcesJar()
+
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+tasks.register('cleanLoomCaches', Delete) {
+    group = 'maintenance'
+    description = 'Deletes Loom caches and common build outputs in the project.'
+
+    // safest targets first
+    delete(
+            file('.gradle/loom-cache-old/remapped_mods'),
+            file('.gradle/loom-cache-old'),
+            file('.gradle/loom-cache'),
+            file('build'),
+            file('run')
+    )
+}
+
+tasks.register('freshBuild') {
+    group = 'maintenance'
+    description = 'Clean Loom caches, then build (use --refresh-dependencies when invoking).'
+    dependsOn 'cleanLoomCaches', 'build'
+}
+
+//tasks.named("runClient") {
+//    jvmArgs "-Dmixin.debug=false",
+//            "-Dmixin.debug.verbose=true",
+//            "-Dmixin.debug.export=true"   // dumps transformed classes to .mixin.out
+//}

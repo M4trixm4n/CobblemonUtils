@@ -66,7 +66,8 @@ public abstract class PokemonNameMixin {
         float hw = ICON_W / 2f;
         float hh = ICON_H / 2f;
         float z = 0f; // No z adjustment
-        int r = 255, g = 255, b = 255, a = 255; // full colors
+        int[] tint = chooseTintColor(entity);
+        int r = tint[0], g = tint[1], b = tint[2], a = 255; // full colors
         int fullbright = LightmapTextureManager.MAX_LIGHT_COORDINATE; // full brightness (not working ?)
 
         vc.vertex(posMat, centerX - hw, centerY + hh, z)
@@ -112,6 +113,11 @@ public abstract class PokemonNameMixin {
                                       .build(true));
     }
 
+    /**
+     * Choose the texture to show depending on the capture status of this pokemon and its other forms
+     * @param entity The pokemon we're looking at, whose name tag is used
+     * @return A texture to the right icon
+     */
     @Unique
     public Identifier chooseTexture (PokemonEntity entity) {
         Identifier noneCaptured = Identifier.of("cobblemonutils", "textures/captured/captured_no.png");
@@ -138,7 +144,7 @@ public abstract class PokemonNameMixin {
         if (sr == null) return noneCaptured;
         boolean all = true;
         boolean thisOne = false;
-        for (FormData f : forms) {
+        for (FormData f: forms) {
             FormDexRecord fr = sr.getFormRecord(f.getName());
             if (fr == null || fr.getKnowledge() != PokedexEntryProgress.CAUGHT) {
                 all = false;
@@ -149,5 +155,21 @@ public abstract class PokemonNameMixin {
         if (all) return allCaptured;
         if (thisOne) return thisCaptured;
         return otherCaptured;
+    }
+
+    /**
+     * (UNIMPLEMENTED) Choose the right color depending on the capture status of this pokemon's shiny variant and its other forms' status
+     * (CURRENT) Default to silver color
+     * @param entity The pokemon we're looking at, whose name tag is used
+     * @return The right color for the situation
+     */
+    @Unique
+    public int[] chooseTintColor (PokemonEntity entity) {
+        int[] gold      = {255, 215, 0};    // All shiny forms captured
+        int[] silver    = {192, 192, 192};  // No shiny forms captured
+        int[] copper    = {184, 115, 51};   // Some shiny forms captured, but not this one
+        int[] softRed   = {255, 107, 107};  // This shiny form captured (not all)
+
+        return silver;
     }
 }
